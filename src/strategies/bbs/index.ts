@@ -1,5 +1,6 @@
 import { formatUnits } from '@ethersproject/units';
 import { call, multicall } from '../../utils';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const author = 'bbs';
 export const version = '0.0.1';
@@ -69,7 +70,7 @@ const abis = [
 ];
 
 // Stacking contract address (or configured in space configuration)
-const stackingContract = "";
+const stackingContract = "0xff052381092420b7f24cc97fded9c0c17b2cbbb9";
 
 export async function strategy(
   space,
@@ -92,7 +93,11 @@ export async function strategy(
     { blockTag }
   );
 
-  const numberOfStakes = await multicall(
+  /**
+  * numberOfStakes is [s1, s2, s3, ....., sN]
+  * numberOfStakes[0] --> address0, numberOfStakes[1] --> address1, ..., numberOfStakes[n] --> addressN
+  */
+  const numberOfStakes:Array<BigNumber> = await multicall(
     network,
     provider,
     abis,
@@ -104,21 +109,28 @@ export async function strategy(
      { blockTag }
   );
 
-  const response = await Promise.all(
+  /**
+  * shares is [[s1,s2,s3,..sN], [s1,s2,s3,..sN],..., [s1,s2,s3,..sN]]
+  * shares[0] --> address1,...,[s1,s2,s3,..sN] --> addressN
+  */
+  const shares:Array<Array<BigNumber>> = await Promise.all(
     numberOfStakes.map((numOfStakes) =>
       multicall(
         network,
         provider,
         abis,
-        Array(numOfStakes).fill(0).map((_,index) => [
+        Array(numOfStakes.toNumber()).fill(0).map((_,index) => [
           stackingContract,
           'shares',
-          [addresses[index], index, currentQuarter]
-        ])
+          [addresses[index], index, currentQuarter],
+          { blockTag }
+        ]),
+        { blockTag }
       ))
   );
 
   return Object.fromEntries(
-      addresses.map((address:any, index) =>
-        [address, response[index].map((shares) => shares.toNumber()).reduce((total, current) => total + current, 0)]));
+      addresses.map((address:any, index:number) =>
+        [address, shares[index].map((shares) =>
+          shares.toNumber()).reduce((total, current) => total + current, 0)]));
 }

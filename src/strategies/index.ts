@@ -1,4 +1,5 @@
 import { strategy as balancer } from './balancer';
+import { strategy as bbs } from './bbs';
 import { strategy as contractCall } from './contract-call';
 import { strategy as ensDomainsOwned } from './ens-domains-owned';
 import { strategy as ensReverseRecord } from './ens-reverse-record';
@@ -201,5 +202,6 @@ export default {
   'rnbw-balance': rnbwBalance,
   'celer-sgn-delegation': celerSgnDelegation,
   'balancer-delegation': balancerDelegation,
-  'aave-governance-power': aaveGovernancePower
+  'aave-governance-power': aaveGovernancePower,
+  'bbs' : bbs
 };
