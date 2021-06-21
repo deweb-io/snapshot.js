@@ -69,8 +69,8 @@ const abis = [
   }
 ];
 
-// Stacking contract address (or configured in space configuration)
-const stackingContract = "0xff052381092420b7f24cc97fded9c0c17b2cbbb9";
+// Stacking contract address
+const stackingContract = "";
 
 export async function strategy(
   space,
